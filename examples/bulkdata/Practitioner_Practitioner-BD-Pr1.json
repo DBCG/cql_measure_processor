@@ -1,0 +1,14 @@
+{
+  "resourceType": "Practitioner",
+  "id": "Practitioner-BD-Pr1",
+  "name": [
+    {
+      "family": "Taylor",
+      "given": [
+        "John"
+      ]
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1949-01-23"
+}

@@ -1,26 +1,24 @@
 package org.opencds.cqf.builders;
 
-import org.hl7.fhir.dstu3.model.Attachment;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Enumerations;
-import org.hl7.fhir.dstu3.model.Library;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.codesystems.LibraryType;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Date;
 
 public class LibraryBuilder extends BaseBuilder<Library> {
 
-    // TODO -  this is a start, but should be extended for completeness.
-
-    public LibraryBuilder(Library library ){
+    public LibraryBuilder( Library library ){
         super(library);
     }
     public LibraryBuilder() {
         this(new Library());
     }
 
+
     public LibraryBuilder buildId(String id) {
-        complexProperty.setId(id);
+        complexProperty.setId( id );
         return this;
     }
 
@@ -29,23 +27,23 @@ public class LibraryBuilder extends BaseBuilder<Library> {
         return this;
     }
 
-    public LibraryBuilder buildStatus(Enumerations.PublicationStatus status) {
-        complexProperty.setStatus(status);
+    public LibraryBuilder buildStatus( Enumerations.PublicationStatus status ) {
+        complexProperty.setStatus( status );
         return this;
     }
 
     public LibraryBuilder buildExperimental(boolean experimental) {
-        complexProperty.setExperimental(experimental);
+        complexProperty.setExperimental( experimental );
         return this;
     }
 
-    public LibraryBuilder buildType(LibraryType libraryType) {
-        CodeableConcept codeableConcept =
-                new CodeableConceptBuilder().buildCoding(
-                    new CodingBuilder()
-                            .buildCode(libraryType.getSystem(), libraryType.toCode(), libraryType.getDisplay())
-                            .build()
-                ).build();
+    public LibraryBuilder buildType( LibraryType libraryType ){
+        CodeableConcept codeableConcept = new CodeableConceptBuilder()
+            .buildCoding( new CodingBuilder()
+                .buildCode( libraryType.getSystem(), libraryType.toCode(), libraryType.getDisplay() )
+                .build()
+            )
+            .build();
         complexProperty.setType(codeableConcept);
 
         return this;
@@ -55,7 +53,7 @@ public class LibraryBuilder extends BaseBuilder<Library> {
         Attachment attachment = new Attachment();
         attachment.setContentType("text/cql");
         byte[] cqlData =cqlString.getBytes("utf-8");
-        attachment.setData(cqlData);
+        attachment.setData( cqlData );
         complexProperty.addContent(attachment);
         return this;
     }

@@ -1,0 +1,19 @@
+{
+  "resourceType": "Patient",
+  "id": "Patient-BD-Pa3",
+  "name": [
+    {
+      "family": "Woody",
+      "given": [
+        "Felecia"
+      ]
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1986-03-15",
+  "generalPractitioner": [
+    {
+      "reference": "Practitioner/Practitioner-BD-Pr3"
+    }
+  ]
+}

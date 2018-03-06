@@ -23,9 +23,18 @@ public class CodingBuilder extends BaseBuilder<Coding> {
         return this;
     }
 
+    public CodingBuilder buildDisplay(String display) {
+        complexProperty.setDisplay(display);
+        return this;
+    }
+
+    public CodingBuilder buildUserSelected(boolean selected) {
+        complexProperty.setUserSelected(selected);
+        return this;
+    }
+
     public CodingBuilder buildCode(String system, String code, String display) {
-        complexProperty.setSystem(system);
-        complexProperty.setCode(code);
+        buildCode( system, code);
         complexProperty.setDisplay(display);
         return this;
     }
@@ -36,13 +45,20 @@ public class CodingBuilder extends BaseBuilder<Coding> {
         return this;
     }
 
-    public CodingBuilder buildDisplay(String display) {
-        complexProperty.setDisplay(display);
-        return this;
+    public CodingBuilder buildSnomedCode(String code, String display) {
+        return this.buildCode( "http://snomed.info/sct", code, display );
     }
 
-    public CodingBuilder buildUserSelected(boolean selected) {
-        complexProperty.setUserSelected(selected);
-        return this;
+    public CodingBuilder buildCptCode(String code, String display ) {
+        return this.buildCode( "http://www.ama-assn.org/go/cpt", code, display );
+    }
+
+    public CodingBuilder buildCptCode(String code, String display, String version) {
+        complexProperty.setVersion(version);
+        return this.buildCptCode( code, display );
+    }
+
+    public CodingBuilder buildLoincCode(String code) {
+        return this.buildCode( "http://loinc.org", code  );
     }
 }

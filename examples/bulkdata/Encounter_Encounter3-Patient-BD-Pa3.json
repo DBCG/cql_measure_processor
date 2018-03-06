@@ -1,0 +1,8 @@
+{
+  "resourceType": "Encounter",
+  "id": "Encounter3-Patient-BD-Pa3",
+  "status": "in-progress",
+  "subject": {
+    "reference": "Patient/Patient-BD-Pa3"
+  }
+}

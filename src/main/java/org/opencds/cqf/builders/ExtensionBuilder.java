@@ -8,7 +8,11 @@ import org.hl7.fhir.dstu3.model.Type;
 public class ExtensionBuilder extends BaseBuilder<Extension> {
 
     public ExtensionBuilder() {
-        super(new Extension());
+        this( new Extension());
+    }
+
+    public ExtensionBuilder(Extension complexProperty) {
+            super(complexProperty);
     }
 
     public ExtensionBuilder buildUrl(String url) {

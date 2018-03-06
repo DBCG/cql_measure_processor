@@ -20,14 +20,14 @@
 	<!-- Servlets -->
 
 	<servlet>
-		<servlet-name>bulkDataResults</servlet-name>
-		<servlet-class>org.opencds.cqf.servlet.BulkDataServlet</servlet-class>
-		<load-on-startup>4</load-on-startup>
+		<servlet-name>cdsServicesServlet</servlet-name>
+		<servlet-class>org.opencds.cqf.servlet.CdsServicesServlet</servlet-class>
+		<load-on-startup>3</load-on-startup>
 	</servlet>
 
 	<servlet>
-		<servlet-name>cdsServicesServlet</servlet-name>
-		<servlet-class>org.opencds.cqf.servlet.CdsServicesServlet</servlet-class>
+		<servlet-name>cdsAsyncServlet</servlet-name>
+		<servlet-class>org.opencds.cqf.servlet.AsyncServicesServlet</servlet-class>
 		<load-on-startup>3</load-on-startup>
 	</servlet>
 
@@ -81,23 +81,23 @@
 	</servlet-mapping>
 
 	<servlet-mapping>
-		<servlet-name>bulkDataResults</servlet-name>
-		<url-pattern>/baseDstu3/export-results/*</url-pattern>
+		<servlet-name>cdsAsyncServlet</servlet-name>
+		<url-pattern>/async-services</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>cdsAsyncServlet</servlet-name>
+		<url-pattern>/async-services/*</url-pattern>
 	</servlet-mapping>
 
 	<!-- This filters provide support for Cross Origin Resource Sharing (CORS) -->
 	<filter>
 		<filter-name>CORS Filter</filter-name>
 		<filter-class>org.ebaysf.web.cors.CORSFilter</filter-class>
-		<!--<init-param>-->
-			<!--<description>A comma separated list of allowed origins. Note: An '*' cannot be used for an allowed origin when using credentials.</description>-->
-			<!--<param-name>cors.allowed.origins</param-name>-->
-			<!--<param-value>http://sandbox.cds-hooks.org, http://clinfhir.com, *</param-value>-->
-		<!--</init-param>-->
 		<init-param>
 			<description>A comma separated list of allowed origins. Note: An '*' cannot be used for an allowed origin when using credentials.</description>
 			<param-name>cors.allowed.origins</param-name>
-			<param-value>*</param-value>
+			<param-value>http://sandbox.cds-hooks.org, http://clinfhir.com, *</param-value>
 		</init-param>
 		<init-param>
 			<description>A comma separated list of HTTP verbs, using which a CORS request can be made.</description>

@@ -3,6 +3,7 @@ package org.opencds.cqf.builders;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Enumerations;
+import org.hl7.fhir.dstu3.model.Reference;
 
 public class ActivityDefinitionBuilder extends BaseBuilder<ActivityDefinition> {
 

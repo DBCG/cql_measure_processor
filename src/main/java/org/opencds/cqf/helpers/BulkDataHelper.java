@@ -60,25 +60,6 @@ public class BulkDataHelper {
         }
     }
 
-    public OperationOutcome createOutcome(List<List<Resource> > resources, javax.servlet.http.HttpServletRequest theServletRequest,
-                                          RequestDetails theRequestDetails)
-    {
-        OperationOutcome outcome = new OperationOutcome();
-        for (List<Resource> resourceList : resources) {
-            String hash = String.valueOf(UUID.randomUUID().hashCode());
-            String mapping = resourceList.get(0).getResourceType().name() + hash;
-            theServletRequest.getSession().setAttribute(mapping, resourceList);
-            outcome.addIssue(
-                    new OperationOutcome.OperationOutcomeIssueComponent()
-                            .setSeverity(OperationOutcome.IssueSeverity.INFORMATION)
-                            .setCode(OperationOutcome.IssueType.INFORMATIONAL)
-                            .addLocation(theRequestDetails.getFhirServerBase() + "/export-results/" + mapping)
-            );
-        }
-
-        return outcome;
-    }
-
     public OperationOutcome createErrorOutcome(String display) {
         Coding code = new Coding().setDisplay(display);
         return new OperationOutcome().addIssue(

@@ -10,17 +10,24 @@ import ca.uhn.fhir.jpa.rp.dstu3.*;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Meta;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.opencds.cqf.async.AsyncHelper;
 import org.opencds.cqf.providers.*;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -86,59 +93,68 @@ public class BaseServlet extends RestfulServer {
         }
 
         // Measure processing
-        FHIRMeasureResourceProvider measureProvider = new FHIRMeasureResourceProvider(getResourceProviders());
-        MeasureResourceProvider jpaMeasureProvider = (MeasureResourceProvider) getProvider("Measure");
-        measureProvider.setDao(jpaMeasureProvider.getDao());
-        measureProvider.setContext(jpaMeasureProvider.getContext());
-
-        // PlanDefinition processing
-        FHIRPlanDefinitionResourceProvider planDefProvider = new FHIRPlanDefinitionResourceProvider(getResourceProviders());
-        PlanDefinitionResourceProvider jpaPlanDefProvider = (PlanDefinitionResourceProvider) getProvider("PlanDefinition");
-        planDefProvider.setDao(jpaPlanDefProvider.getDao());
-        planDefProvider.setContext(jpaPlanDefProvider.getContext());
-
+        {
+            FHIRMeasureResourceProvider measureProvider = new FHIRMeasureResourceProvider(getResourceProviders());
+            MeasureResourceProvider jpaMeasureProvider = (MeasureResourceProvider) getProvider("Measure");
+            measureProvider.setDao(jpaMeasureProvider.getDao());
+            measureProvider.setContext(jpaMeasureProvider.getContext());
+            try {
+                unregisterProvider(jpaMeasureProvider);
+            } catch (Exception e) {
+                throw new ServletException("Unable to unregister provider: " + e.getMessage());
+            }
+            registerProvider(measureProvider);
+        }
         // ActivityDefinition processing
-        FHIRActivityDefinitionResourceProvider actDefProvider = new FHIRActivityDefinitionResourceProvider(getResourceProviders());
-        ActivityDefinitionResourceProvider jpaActDefProvider = (ActivityDefinitionResourceProvider) getProvider("ActivityDefinition");
-        actDefProvider.setDao(jpaActDefProvider.getDao());
-        actDefProvider.setContext(jpaActDefProvider.getContext());
-
-        // StructureMap processing
-        FHIRStructureMapResourceProvider structureMapProvider = new FHIRStructureMapResourceProvider(getResourceProviders());
-        StructureMapResourceProvider jpaStructMapProvider = (StructureMapResourceProvider) getProvider("StructureMap");
-        structureMapProvider.setDao(jpaStructMapProvider.getDao());
-        structureMapProvider.setContext(jpaStructMapProvider.getContext());
-
-        // Patient processing - for bulk data export
-        BulkDataPatientProvider bulkDataPatientProvider = new BulkDataPatientProvider(getResourceProviders());
-        PatientResourceProvider jpaPatientProvider = (PatientResourceProvider) getProvider("Patient");
-        bulkDataPatientProvider.setDao(jpaPatientProvider.getDao());
-        bulkDataPatientProvider.setContext(jpaPatientProvider.getContext());
-
-        // Group processing - for bulk data export
-        BulkDataGroupProvider bulkDataGroupProvider = new BulkDataGroupProvider(getResourceProviders());
-        GroupResourceProvider jpaGroupProvider = (GroupResourceProvider) getProvider("Group");
-        bulkDataGroupProvider.setDao(jpaGroupProvider.getDao());
-        bulkDataGroupProvider.setContext(jpaGroupProvider.getContext());
-
-        try {
-            unregisterProvider(jpaMeasureProvider);
-            unregisterProvider(jpaPlanDefProvider);
-            unregisterProvider(jpaActDefProvider);
-            unregisterProvider(jpaStructMapProvider);
-            unregisterProvider(jpaPatientProvider);
-            unregisterProvider(jpaGroupProvider);
-        } catch (Exception e) {
-            throw new ServletException("Unable to unregister provider: " + e.getMessage());
+        {
+            FHIRActivityDefinitionResourceProvider actDefProvider = new FHIRActivityDefinitionResourceProvider(getResourceProviders());
+            ActivityDefinitionResourceProvider jpaActDefProvider =
+                    (ActivityDefinitionResourceProvider) getProvider("ActivityDefinition");
+            actDefProvider.setDao(jpaActDefProvider.getDao());
+            actDefProvider.setContext(jpaActDefProvider.getContext());
+            try { unregisterProvider(jpaActDefProvider);
+            } catch (Exception e) { throw new ServletException("Unable to unregister provider: " + e.getMessage()); }
+            registerProvider(actDefProvider);
         }
 
-        registerProvider(measureProvider);
-        registerProvider(planDefProvider);
-        registerProvider(actDefProvider);
-        registerProvider(structureMapProvider);
-        registerProvider(bulkDataPatientProvider);
-        registerProvider(bulkDataGroupProvider);
-
+        // PlanDefinition processing
+        {
+            FHIRPlanDefinitionResourceProvider planDefProvider = new FHIRPlanDefinitionResourceProvider(getResourceProviders());
+            PlanDefinitionResourceProvider jpaPlanDefProvider =
+                    (PlanDefinitionResourceProvider) getProvider("PlanDefinition");
+            planDefProvider.setDao(jpaPlanDefProvider.getDao());
+            planDefProvider.setContext(jpaPlanDefProvider.getContext());
+            try {
+                unregisterProvider(jpaPlanDefProvider);
+            } catch (Exception e) {
+                throw new ServletException("Unable to unregister provider: " + e.getMessage());
+            }
+            registerProvider(planDefProvider);
+        }
+        // Patient export processing
+        {
+            FHIRPatientResourceProvider fhirPatientResourceProvider = new FHIRPatientResourceProvider(getResourceProviders());
+            PatientResourceProvider patientResourceProvider =
+                    (PatientResourceProvider) getProvider("Patient");
+            ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoPatientDstu3 dao;
+            fhirPatientResourceProvider.setDao(patientResourceProvider.getDao());
+            fhirPatientResourceProvider.setContext(patientResourceProvider.getContext());
+            try { unregisterProvider(patientResourceProvider);
+            } catch (Exception e) { throw new ServletException("Unable to unregister provider: " + e.getMessage()); }
+            registerProvider(fhirPatientResourceProvider);
+        }
+        // Group export processing
+        {
+            FHIRGroupProvider fhirProvider = new FHIRGroupProvider(getResourceProviders());
+            GroupResourceProvider resourceProvider =
+                    (GroupResourceProvider) getProvider("Group");
+            ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoPatientDstu3 dao;
+            fhirProvider.setDao(resourceProvider.getDao());
+            fhirProvider.setContext(resourceProvider.getContext());
+            try { unregisterProvider(resourceProvider);
+            } catch (Exception e) { throw new ServletException("Unable to unregister provider: " + e.getMessage()); }
+            registerProvider(fhirProvider);
+        }
         // Register the logging interceptor
         LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
         this.registerInterceptor(loggingInterceptor);
@@ -165,4 +181,41 @@ public class BaseServlet extends RestfulServer {
 
         throw new IllegalArgumentException("This should never happen!");
     }
+
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String contentType = request.getContentType();
+        String prefer      = request.getHeader("Prefer");
+
+        if ( prefer!=null && prefer.equals("respond-async") ){
+            String sessionId = AsyncHelper.newAyncGetSession( request, response);
+            String callUrl = request.getRequestURL().toString();
+
+            String sessionUrl = callUrl.substring(0, callUrl.indexOf("baseDstu3/"))+"async-services/"+sessionId;
+
+            response.setStatus(202);
+            response.setHeader("Content-Location",sessionUrl);
+            OperationOutcome operationOutcome = new OperationOutcome();
+            operationOutcome.addIssue()
+                .setSeverity( OperationOutcome.IssueSeverity.INFORMATION)
+                .setCode(OperationOutcome.IssueType.VALUE)
+                .addLocation(sessionUrl)
+            ;
+            String json = getFhirContext().newJsonParser().encodeResourceToString(operationOutcome);
+            response.setContentType("text/x-json;charset=UTF-8");
+            response.setHeader("Cache-Control", "no-cache");
+            try {
+                response.getWriter().write(json.toString());
+            } catch (IOException e) {
+                System.out.println( "Oeps something went wrong" );
+            }
+        }
+         else {
+            //handleRequest(RequestTypeEnum.GET, request, response);
+            super.doGet(request,response);
+        }
+
+    }
+
 }

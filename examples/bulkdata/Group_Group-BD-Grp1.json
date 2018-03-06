@@ -1,0 +1,29 @@
+{
+  "resourceType": "Group",
+  "id": "Group-BD-Grp1",
+  "active": true,
+  "type": "person",
+  "name": "My bulk data test group",
+  "member": [
+    {
+      "entity": {
+        "reference": "Patient/Patient-BD-Pa3"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/Patient-BD-Pa4"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/Patient-BD-Pa5"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Practitioner/Practitioner-BD-Pr3"
+      }
+    }
+  ]
+}

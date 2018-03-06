@@ -1,0 +1,14 @@
+{
+  "resourceType": "Practitioner",
+  "id": "Practitioner-BD-Pr3",
+  "name": [
+    {
+      "family": "Channell",
+      "given": [
+        "Sara"
+      ]
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1949-03-23"
+}
