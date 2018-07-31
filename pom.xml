@@ -215,6 +215,20 @@
         </dependency>
 
 
+
+        <!-- Generates a random name -->
+        <dependency>
+            <groupId>org.ajbrown</groupId>
+            <artifactId>name-machine</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.codepoetics</groupId>
+            <artifactId>protonpack</artifactId>
+            <version>1.13</version>
+        </dependency>
+
         <!-- You may not need this if you are deploying to an application server which provides database connection pools itself. -->
         <dependency>
             <groupId>org.apache.commons</groupId>

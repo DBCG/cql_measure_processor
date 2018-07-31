@@ -6,6 +6,10 @@ import org.junit.Assert;
 
 import java.util.List;
 
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+
 class DefinitionApplyTests {
 
     private TestServer server;
@@ -43,7 +47,14 @@ class DefinitionApplyTests {
 
         CarePlan carePlan = (CarePlan) resource;
 
-        Assert.assertTrue(carePlan.getTitle().equals("This is a dynamic definition!"));
+        assertEquals( 1, carePlan.getContained().size() );
+        assertTrue( carePlan.getContained().get(0) instanceof RequestGroup  );
+        RequestGroup requestGroup = (RequestGroup)carePlan.getContained().get(0);
+        assertEquals( 1, requestGroup.getAction().size() );
+
+        RequestGroup.RequestGroupActionComponent actionComponent = requestGroup.getActionFirstRep();
+
+        assertEquals( "This is a dynamic definition!", actionComponent.getTitle() );
     }
 
     void ActivityDefinitionApplyTest() {

@@ -3,6 +3,7 @@ package org.opencds.cqf;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opencds.cqf.cds.BmiRequired;
 
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
@@ -98,4 +99,14 @@ public class TestBase {
         applyTests.PlanDefinitionApplyTest();
         applyTests.ActivityDefinitionApplyTest();
     }
+
+    @Test
+    public void runBmiApplyTests() throws Exception {
+        BmiRequired bmiRequired = new BmiRequired( server );
+        bmiRequired.testPatientNoData();
+        bmiRequired.testPatientHeightData();
+        bmiRequired.testPatientWeightData();
+        bmiRequired.testPatientWeightHeightData();
+    }
+
 }

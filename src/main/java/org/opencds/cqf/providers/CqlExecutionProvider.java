@@ -3,12 +3,18 @@ package org.opencds.cqf.providers;
 import ca.uhn.fhir.jpa.rp.dstu3.LibraryResourceProvider;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
+import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
+import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.opencds.cqf.config.STU3LibraryLoader;
 import org.opencds.cqf.config.STU3LibrarySourceProvider;
 import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.execution.LibraryLoader;
 import org.opencds.cqf.helpers.LibraryHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,9 +24,13 @@ import java.util.List;
  */
 public class CqlExecutionProvider {
     private JpaDataProvider provider;
+    private final FHIRPathEngine fhirPathEngine;
+    private static final Logger logger = LoggerFactory.getLogger(CqlExecutionProvider.class );
 
     public CqlExecutionProvider(JpaDataProvider provider) {
         this.provider = provider;
+        HapiWorkerContext hapiWorkerContext = new HapiWorkerContext(provider.getFhirContext(), new DefaultProfileValidationSupport());
+        fhirPathEngine = new FHIRPathEngine(hapiWorkerContext);
     }
 
     private ModelManager modelManager;
@@ -158,9 +168,29 @@ public class CqlExecutionProvider {
         return builder.toString();
     }
 
-    /* Evaluates the given CQL expression in the context of the given resource */
+    /**
+     * Evaluate a dynamic value in this context
+     * @return
+     */
+    public Object evaluateInContext(DomainResource instance, String language, String dynamicValue, String patientId) throws FHIRException {
+        Object result = null;
+        logger.info("Execute ("+language+") "+dynamicValue);
+
+        if ( language==null || language.equals("text/cql")) {
+            result = evaluateInContext(instance,dynamicValue,patientId );
+        } else if (language.equals("text/fhirpath")) {
+            result = fhirPathEngine.evaluate( instance, dynamicValue );
+        } else { // assume cql
+            result = evaluateInContext(instance,dynamicValue,patientId );
+        }
+        return result;
+    }
+
+        /* Evaluates the given CQL expression in the context of the given resource */
     /* If the resource has a library extension, or a library element, that library is loaded into the context for the expression */
-    public Object evaluateInContext(DomainResource instance, String cql, String patientId) {
+    private Object evaluateInContext(DomainResource instance, String cql, String patientId) {
+
+
         Iterable<Reference> libraries = getLibraryReferences(instance);
 
         // Provide the instance as the value of the '%context' parameter, as well as the value of a parameter named the same as the resource

@@ -3,6 +3,7 @@ package org.opencds.cqf.builders;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Enumerations;
+import org.hl7.fhir.dstu3.model.Reference;
 
 public class ActivityDefinitionBuilder extends BaseBuilder<ActivityDefinition> {
 
@@ -82,5 +83,10 @@ public class ActivityDefinitionBuilder extends BaseBuilder<ActivityDefinition> {
 
     public ActivityDefinitionBuilder buildCqlDynamicValue(String description, String path, String expression ) {
         return this.buildDynamicValue(description, path, "text/cql", expression);
+    }
+
+    public ActivityDefinitionBuilder buildLibrary(String libraryId ) {
+        complexProperty.addLibrary( new Reference().setReference(libraryId));
+        return this;
     }
 }

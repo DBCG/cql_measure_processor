@@ -10,6 +10,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.omg.CORBA.Request;
 import org.opencds.cqf.providers.JpaDataProvider;
 import org.opencds.cqf.servlet.BaseServlet;
 
@@ -18,7 +19,7 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Scanner;
 
-class TestServer {
+public class TestServer {
 
     private FhirContext ourCtx = FhirContext.forDstu3();
     private Server ourServer;
@@ -27,11 +28,11 @@ class TestServer {
     int ourPort;
     IGenericClient ourClient;
 
-    void start() throws Exception {
+    public void start() throws Exception {
         String path = Paths.get("").toAbsolutePath().toString();
 
         // changing from random to hard coded
-        ourPort = 8080;
+        ourPort = 8090;
         ourServer = new Server(ourPort);
 
         WebAppContext webAppContext = new WebAppContext();
@@ -60,11 +61,11 @@ class TestServer {
         ourClient.registerInterceptor(new LoggingInterceptor(true));
     }
 
-    void stop() throws Exception {
+    public void stop() throws Exception {
         ourServer.stop();
     }
 
-    void putResource(String resourceFileName, String id) {
+    public void putResource(String resourceFileName, String id) {
         InputStream is = TestBase.class.getResourceAsStream(resourceFileName);
         Scanner scanner = new Scanner(is).useDelimiter("\\A");
         String json = scanner.hasNext() ? scanner.next() : "";
@@ -79,5 +80,19 @@ class TestServer {
         else {
             ourClient.update().resource(resource).withId(id).execute();
         }
+    }
+
+
+    public void putResource(IBaseResource resource ) {
+        if (resource instanceof Bundle) {
+            ourClient.transaction().withBundle((Bundle) resource).execute();
+        }
+        else {
+            ourClient.update().resource(resource).execute();
+        }
+    }
+
+    public IGenericClient getOurClient() {
+        return ourClient;
     }
 }

@@ -1,9 +1,11 @@
 package org.opencds.cqf.builders;
 
 import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RequestGroup;
 import org.hl7.fhir.exceptions.FHIRException;
 
+import java.util.Date;
 import java.util.List;
 
 public class RequestGroupBuilder extends BaseBuilder<RequestGroup> {
@@ -48,9 +50,33 @@ public class RequestGroupBuilder extends BaseBuilder<RequestGroup> {
         complexProperty.setAction(actions);
         return this;
     }
-
+    public void buildAction(RequestGroup.RequestGroupActionComponent requestGroupActionComponent) {
+        complexProperty.addAction(requestGroupActionComponent);
+    }
     public RequestGroupBuilder buildExtension(List<Extension> extensions) {
         complexProperty.setExtension(extensions);
         return this;
     }
+
+    public RequestGroupBuilder buildId(String id) {
+        complexProperty.setId(id);
+        return  this;
+    }
+
+    public RequestGroupBuilder buildSubject(Reference reference) {
+        complexProperty.setSubject(reference);
+        return this;
+    }
+
+    public RequestGroupBuilder buildContext(Reference reference) {
+        complexProperty.setContext(reference);
+        return this;
+    }
+
+    public RequestGroupBuilder buildAuthoredOnToNow() {
+        complexProperty.setAuthoredOn(new Date());
+        return this;
+    }
+
+
 }

@@ -7,6 +7,8 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import org.hl7.fhir.dstu3.model.Enumeration;
+import org.hl7.fhir.dstu3.model.InstantType;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.data.fhir.FhirDataProviderStu3;
@@ -15,10 +17,7 @@ import org.opencds.cqf.cql.runtime.DateTime;
 import org.opencds.cqf.cql.runtime.Interval;
 import org.opencds.cqf.cql.terminology.ValueSetInfo;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class JpaDataProvider extends FhirDataProviderStu3 {
 
@@ -130,5 +129,16 @@ public class JpaDataProvider extends FhirDataProviderStu3 {
             }
         }
         throw new RuntimeException("Could not find resource provider for type: " + datatype);
+    }
+
+    public void setValue(Object target, String path, Object value) {
+        if ( target instanceof InstantType && value instanceof DateTime ){
+            DateTime dateTime = (DateTime)value;
+            Date date =((DateTime)value).getJodaDateTime().toDate();
+            super.setValue( target, path, date );
+        } else {
+            super.setValue( target, path, value );
+        }
+
     }
 }

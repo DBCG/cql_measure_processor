@@ -61,7 +61,7 @@ public abstract class CdsRequest {
     }
 
     // TODO - override for cdc-opioid-guidance base call - runs every recommendation
-    public List<CdsCard> process(CdsHooksProviders providers) {
+    public List<CdsCard> process(CdsHooksProviders providers) throws FHIRException {
         // cannot use this server for DSTU2 resource retrieval TODO - support DSTU2
         if (isFhirServerLocal() && providers.getVersion() == CdsHooksProviders.FhirVersion.DSTU2) {
             throw new RuntimeException("A DSTU2 fhirServer endpoint or the prefetch resources must be provided in order to evaluate a DSTU2 library");

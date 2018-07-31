@@ -1,6 +1,7 @@
 package org.opencds.cqf.builders;
 
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.exceptions.FHIRException;
 
 import java.util.Collections;
 import java.util.List;
@@ -55,6 +56,47 @@ public class RequestGroupActionBuilder extends BaseBuilder<RequestGroup.RequestG
 
     public RequestGroupActionBuilder buildExtension(List<Extension> extensions) {
         complexProperty.setExtension(extensions);
+        return this;
+    }
+
+    public RequestGroupActionBuilder setCardinalityBehavior(PlanDefinition.ActionCardinalityBehavior cardinalityBehavior) {
+        try {
+            complexProperty.setCardinalityBehavior( RequestGroup.ActionCardinalityBehavior.fromCode(cardinalityBehavior.toCode()));
+        } catch (FHIRException e) {
+            e.printStackTrace();
+        }
+        return this;
+    }
+
+    public RequestGroupActionBuilder setGroupingBehavior( PlanDefinition.ActionGroupingBehavior actionGroupingBehavior) {
+        try {
+            complexProperty.setGroupingBehavior( RequestGroup.ActionGroupingBehavior.fromCode(actionGroupingBehavior.toCode()));
+        } catch (FHIRException e) {
+            e.printStackTrace();
+        }
+        return this;
+    }
+
+    public RequestGroupActionBuilder setPreCheckBehavior(PlanDefinition.ActionPrecheckBehavior precheckBehavior) {
+        try {
+            complexProperty.setPrecheckBehavior( RequestGroup.ActionPrecheckBehavior.fromCode(precheckBehavior.toCode()));
+        } catch (FHIRException e) {
+            e.printStackTrace();
+        }
+        return this;
+    }
+
+    public RequestGroupActionBuilder setSelectionBehavior(PlanDefinition.ActionSelectionBehavior selectionBehavior) {
+        try {
+            complexProperty.setSelectionBehavior( RequestGroup.ActionSelectionBehavior.fromCode(selectionBehavior.toCode()));
+        } catch (FHIRException e) {
+            e.printStackTrace();
+        }
+        return this;
+    }
+
+    public RequestGroupActionBuilder buildAction(RequestGroup.RequestGroupActionComponent requestGroupActionComponent) {
+        complexProperty.addAction( requestGroupActionComponent );
         return this;
     }
 }

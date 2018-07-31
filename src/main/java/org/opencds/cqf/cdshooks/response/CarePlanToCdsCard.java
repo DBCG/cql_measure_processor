@@ -53,66 +53,82 @@ public class CarePlanToCdsCard {
 
         if (requestGroup.hasAction()) {
             for (RequestGroup.RequestGroupActionComponent action : requestGroup.getAction()) {
-                CdsCard card = new CdsCard();
-                // basic
-                if (action.hasTitle()) {
-                    card.setSummary(action.getTitle());
-                }
-                if (action.hasDescription()) {
-                    card.setDetail(action.getDescription());
-                }
-                if (action.hasExtension()) {
-                    card.setIndicator(action.getExtensionFirstRep().getValue().toString());
-                }
-
-                // source
-                if (action.hasDocumentation()) {
-                    // Assuming first related artifact has everything
-                    RelatedArtifact documentation = action.getDocumentationFirstRep();
-                    CdsCard.Source source = new CdsCard.Source();
-                    if (documentation.hasDisplay()) {
-                        source.setLabel(documentation.getDisplay());
-                    }
-                    if (documentation.hasUrl()) {
-                        source.setUrl(documentation.getUrl());
-                    }
-                    if (documentation.hasDocument() && documentation.getDocument().hasUrl()) {
-                        source.setIcon(documentation.getDocument().getUrl());
-                    }
-
-                    card.setSource(source);
-                }
-
-                // suggestions
-                // TODO - uuid
-                boolean hasSuggestions = false;
-                CdsCard.Suggestions suggestions = new CdsCard.Suggestions();
-                CdsCard.Suggestions.Action actions = new CdsCard.Suggestions.Action();
-                if (action.hasLabel()) {
-                    suggestions.setLabel(action.getLabel());
-                    hasSuggestions = true;
-                    if (action.hasDescription()) {
-                        actions.setDescription(action.getDescription());
-                    }
-                    if (action.hasType() && !action.getType().getCode().equals("fire-event")) {
-                        String code = action.getType().getCode();
-                        actions.setType(CdsCard.Suggestions.Action.ActionType.valueOf(code.equals("remove") ? "delete" : code));
-                    }
-                    if (action.hasResource()) {
-                        actions.setResource(action.getResourceTarget());
-                    }
-                }
-                if (hasSuggestions) {
-                    suggestions.addAction(actions);
-                    card.addSuggestion(suggestions);
-                }
-                if (!links.isEmpty()) {
-                    card.setLinks(links);
-                }
-                cards.add(card);
+                processAction(cards, links, action);
             }
         }
 
-        return cards;
+        // filter out empty cards
+        ArrayList<CdsCard> result = new ArrayList<>();
+        for ( CdsCard card: cards ){
+            if ( card.hasSummary() /* && card.hasIndicator() */ ){
+                result.add( card );
+            }
+        }
+
+        return result;
+    }
+
+    private static void processAction(List<CdsCard> cards, List<CdsCard.Links> links, RequestGroup.RequestGroupActionComponent action) {
+        CdsCard card = new CdsCard();
+        // basic
+        if (action.hasTitle()) {
+            card.setSummary(action.getTitle());
+        }
+        if (action.hasDescription()) {
+            card.setDetail(action.getDescription());
+        }
+        if (action.hasExtension()) {
+            card.setIndicator(action.getExtensionFirstRep().getValue().toString());
+        }
+
+        // source
+        if (action.hasDocumentation()) {
+            // Assuming first related artifact has everything
+            RelatedArtifact documentation = action.getDocumentationFirstRep();
+            CdsCard.Source source = new CdsCard.Source();
+            if (documentation.hasDisplay()) {
+                source.setLabel(documentation.getDisplay());
+            }
+            if (documentation.hasUrl()) {
+                source.setUrl(documentation.getUrl());
+            }
+            if (documentation.hasDocument() && documentation.getDocument().hasUrl()) {
+                source.setIcon(documentation.getDocument().getUrl());
+            }
+
+            card.setSource(source);
+        }
+
+        // suggestions
+        // TODO - uuid
+        boolean hasSuggestions = false;
+        CdsCard.Suggestions suggestions = new CdsCard.Suggestions();
+        CdsCard.Suggestions.Action actions = new CdsCard.Suggestions.Action();
+        if (action.hasLabel()) {
+            suggestions.setLabel(action.getLabel());
+            hasSuggestions = true;
+            if (action.hasDescription()) {
+                actions.setDescription(action.getDescription());
+            }
+            if (action.hasType() && !action.getType().getCode().equals("fire-event")) {
+                String code = action.getType().getCode();
+                actions.setType(CdsCard.Suggestions.Action.ActionType.valueOf(code.equals("remove") ? "delete" : code));
+            }
+            if (action.hasResource()) {
+                actions.setResource(action.getResourceTarget());
+            }
+        }
+        if (hasSuggestions) {
+            suggestions.addAction(actions);
+            card.addSuggestion(suggestions);
+        }
+        if (!links.isEmpty()) {
+            card.setLinks(links);
+        }
+        cards.add(card);
+
+        for (RequestGroup.RequestGroupActionComponent subAction : action.getAction()) {
+            processAction( cards, links, subAction );
+        }
     }
 }
